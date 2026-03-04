@@ -1,5 +1,5 @@
 {
-  "name": "nexforge-v2",
+  "name": "nexforge-clean",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -17,8 +17,10 @@
     "wagmi": "^2.12.0",
     "viem": "^2.21.1",
     "@tanstack/react-query": "^5.51.1",
-    "axios": "^1.7.7", // untuk fetch API Dexscreener
-    "framer-motion": "^11.0.8"
+    "framer-motion": "^11.0.8",
+    "@tsparticles/react": "^3.0.0",
+    "@tsparticles/engine": "^3.0.0",
+    "tsparticles": "^3.0.0"
   },
   "devDependencies": {
     "@types/node": "^20",
