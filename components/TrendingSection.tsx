@@ -5,7 +5,7 @@ import { useQuery, gql } from '@apollo/client';
 const GET_RECENT_TOKENS = gql`
   query GetRecentTokens {
     tokens(
-      first: 10
+      first: 12
       orderBy: createdAt
       orderDirection: desc
       where: { chainId: "base" }
@@ -34,8 +34,8 @@ export default function TrendingSection() {
     pollInterval: 15000,
   });
 
-  if (loading) return <p className="text-center text-gray-500">Loading Doppler tokens...</p>;
-  if (error) return <p className="text-center text-red-400">Error: {error.message}</p>;
+  if (loading) return <p className="text-center text-gray-500">Loading new tokens from Doppler...</p>;
+  if (error) return <p className="text-center text-red-400">Error loading data: {error.message}</p>;
 
   const tokens = data?.tokens || [];
 
@@ -77,7 +77,7 @@ export default function TrendingSection() {
       {tokens.length === 0 && (
         <p className="text-center text-gray-500 mt-8">
           No new tokens detected right now. Check{' '}
-          <a href="https://app.doppler.lol/" target="_blank" className="text-cyan-400 hover:text-cyan-300">
+          <a href="https://app.doppler.lol/" target="_blank" rel="noopener noreferrer" className="text-cyan-400 hover:text-cyan-300 underline">
             Doppler App →
           </a>
         </p>
