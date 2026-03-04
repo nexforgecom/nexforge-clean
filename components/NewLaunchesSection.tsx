@@ -68,6 +68,7 @@ export default function NewLaunchesSection() {
             <a
               href={`https://dexscreener.com/base/${pair.pairAddress}`}
               target="_blank"
+              rel="noopener noreferrer"
               className="mt-4 inline-block text-cyan-400 hover:text-cyan-300 text-sm"
             >
               View on DexScreener →
@@ -76,8 +77,8 @@ export default function NewLaunchesSection() {
         ))}
       </div>
       {newPairs.length === 0 && (
-        <p className="text-center text-gray-500 mt-8">No new launches right now.</p>
+        <p className="text-center text-gray-500 mt-8">Tidak ada launch baru saat ini. Coba refresh atau tunggu aktivitas tinggi!</p>
       )}
     </div>
   );
-                                                        }
+}
