@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 
 interface Pair {
   baseToken: { symbol: string; address: string };
-  quoteToken: { symbol: string; address: string };
+  quoteToken: { symbol: string };
   priceUsd: string;
   volume: { h24: number };
   priceChange: { h24: number };
@@ -12,7 +12,13 @@ interface Pair {
   age: number;
 }
 
-export default function NewLaunchesSection() {
+interface NewLaunchesProps {
+  searchQuery: string;
+  favorites: string[];
+  toggleFavorite: (pairAddress: string) => void;
+}
+
+export default function NewLaunchesSection({ searchQuery, favorites, toggleFavorite }: NewLaunchesProps) {
   const [newPairs, setNewPairs] = useState<Pair[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -28,19 +34,18 @@ export default function NewLaunchesSection() {
 
         let pairs = data.pairs
           ?.filter((p: any) => p.chainId === 'base' && (p.age || 0) < 3600)
-          ?.sort((a: any, b: any) => b.volume.h24 - a.volume.h24)
-          ?.slice(0, 12) || [];
+          ?.sort((a: any, b: any) => b.volume.h24 - a.volume.h24) || [];
 
-        // Fix nama token
-        pairs = pairs.map((p: any) => ({
-          ...p,
-          baseToken: {
-            ...p.baseToken,
-            symbol: p.baseToken.symbol || p.quoteToken.symbol || 'BASE',
-          },
-        }));
+        if (searchQuery.trim()) {
+          const query = searchQuery.toLowerCase();
+          pairs = pairs.filter((p: any) =>
+            p.baseToken.symbol?.toLowerCase().includes(query) ||
+            p.quoteToken.symbol?.toLowerCase().includes(query) ||
+            p.baseToken.address.toLowerCase().includes(query)
+          );
+        }
 
-        setNewPairs(pairs);
+        setNewPairs(pairs.slice(0, 12));
       } catch (err) {
         setError('Gagal load new launches');
       } finally {
@@ -51,10 +56,7 @@ export default function NewLaunchesSection() {
     fetchNew();
     const interval = setInterval(fetchNew, 60000);
     return () => clearInterval(interval);
-  }, []);
-
-  if (loading) return <p className="text-center text-gray-500">Loading new launches...</p>;
-  if (error) return <p className="text-center text-red-400">{error}</p>;
+  }, [searchQuery]);
 
   return (
     <div className="mt-16">
@@ -63,9 +65,15 @@ export default function NewLaunchesSection() {
         {newPairs.map((pair, i) => (
           <div
             key={i}
-            className="bg-gray-800/60 rounded-xl p-6 border border-teal-500/20 hover:border-teal-400 transition-all"
+            className="bg-gray-800/60 rounded-xl p-6 border border-teal-500/20 hover:border-teal-400 transition-all relative"
           >
-            <h3 className="text-xl font-bold text-teal-300">{pair.baseToken.symbol}</h3>
+            <button
+              onClick={() => toggleFavorite(pair.pairAddress)}
+              className="absolute top-4 right-4 text-yellow-400 hover:text-yellow-300 text-2xl"
+            >
+              {favorites.includes(pair.pairAddress) ? '★' : '☆'}
+            </button>
+            <h3 className="text-xl font-bold text-teal-300">{pair.baseToken.symbol || pair.quoteToken.symbol || 'BASE'}</h3>
             <p className="text-2xl font-semibold text-white mt-2">
               ${Number(pair.priceUsd).toFixed(6)}
             </p>
@@ -91,4 +99,4 @@ export default function NewLaunchesSection() {
       )}
     </div>
   );
-}
+      }
