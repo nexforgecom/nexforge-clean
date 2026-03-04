@@ -1,12 +1,22 @@
 import ConnectWalletButton from '@/components/ConnectWalletButton';
+import TrendingSection from '@/components/TrendingSection';
 
 export default function Home() {
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center bg-gray-900 text-white">
-      <h1 className="text-5xl font-bold text-cyan-400">NexxForge v2</h1>
-      <p className="mt-4 text-lg">Your personal Base wallet dashboard + trending meme tracker.</p>
-      <div className="mt-8">
-        <ConnectWalletButton />
+    <main className="flex min-h-screen flex-col items-center p-8 bg-gray-950 text-white">
+      <h1 className="text-6xl font-extrabold bg-gradient-to-r from-cyan-400 to-teal-500 bg-clip-text text-transparent mb-4">
+        NexxForge v2
+      </h1>
+      <p className="text-xl text-gray-300 mb-12 text-center max-w-2xl">
+        Your personal Base wallet dashboard + trending meme tracker.
+      </p>
+
+      <div className="w-full max-w-4xl">
+        <div className="flex justify-center mb-16">
+          <ConnectWalletButton />
+        </div>
+
+        <TrendingSection />
       </div>
     </main>
   );
