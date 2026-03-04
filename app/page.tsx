@@ -5,13 +5,13 @@ export default function Home() {
         NexForge v2
       </h1>
       <p className="mt-6 text-xl text-gray-300 text-center max-w-2xl">
-        Launch tokens easily on Base chain. Clean, fast, and no drama.
+        Your personal Base wallet dashboard + trending meme tracker.
       </p>
       <a
-        href="/create"
+        href="/dashboard"
         className="mt-10 px-10 py-5 bg-gradient-to-r from-cyan-500 to-teal-500 text-black font-bold text-xl rounded-xl hover:scale-105 transition"
       >
-        Start Launching
+        Open Dashboard
       </a>
     </div>
   );
