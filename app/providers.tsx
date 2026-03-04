@@ -10,14 +10,12 @@ const queryClient = new QueryClient();
 
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
-    <ApolloProvider client={client}>
-      <WagmiProvider config={config}>
-        <QueryClientProvider client={queryClient}>
-          <RainbowKitProvider theme={customTheme}>
-            {children}
-          </RainbowKitProvider>
-        </QueryClientProvider>
-      </WagmiProvider>
-    </ApolloProvider>
+    <WagmiProvider config={config}>
+      <QueryClientProvider client={queryClient}>
+        <RainbowKitProvider theme={customTheme}>
+          {children}
+        </RainbowKitProvider>
+      </QueryClientProvider>
+    </WagmiProvider>
   );
 }
