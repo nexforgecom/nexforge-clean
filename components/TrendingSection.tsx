@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 
 interface Pair {
   baseToken: { symbol: string; address: string };
+  quoteToken: { symbol: string; address: string };
   priceUsd: string;
   volume: { h24: number };
   priceChange: { h24: number };
@@ -27,15 +28,21 @@ export default function TrendingSection() {
         const data = await res.json();
 
         let pairs = data.pairs
-          ?.filter((p: any) => p.chainId === 'base' && p.volume?.h24 > 100) // Sangat longgar untuk test real data
+          ?.filter((p: any) => p.chainId === 'base' && p.volume?.h24 > 100)
           ?.sort((a: any, b: any) => b.priceChange.h24 - a.priceChange.h24)
           ?.slice(0, 12) || [];
 
-        console.log('Real trending pairs:', pairs.length); // Debug di console
+        // Fix nama token kalau base kosong
+        pairs = pairs.map((p: any) => ({
+          ...p,
+          baseToken: {
+            ...p.baseToken,
+            symbol: p.baseToken.symbol || p.quoteToken.symbol || 'BASE',
+          },
+        }));
 
         setTrending(pairs);
       } catch (err) {
-        console.error('Fetch error:', err);
         setError('Gagal load trending');
       } finally {
         setLoading(false);
@@ -81,8 +88,8 @@ export default function TrendingSection() {
         ))}
       </div>
       {trending.length === 0 && (
-        <p className="text-center text-gray-500 mt-8">Tidak ada data trending saat ini (market sepi). Coba refresh atau tunggu pump!</p>
+        <p className="text-center text-gray-500 mt-8">Tidak ada data trending saat ini. Coba refresh atau tunggu pump!</p>
       )}
     </div>
   );
-      }
+}
