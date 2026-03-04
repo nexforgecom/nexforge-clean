@@ -1,8 +1,11 @@
-import merge from 'lodash.merge';
 import { Theme, darkTheme } from '@rainbow-me/rainbowkit';
 
-export const customTheme = merge(darkTheme(), {
+const baseDark = darkTheme();
+
+export const customTheme: Theme = {
+  ...baseDark,
   colors: {
+    ...baseDark.colors,
     accentColor: '#00f5d4',
     accentColorForeground: '#0f172a',
     connectButtonBackground: '#00f5d4',
@@ -10,11 +13,13 @@ export const customTheme = merge(darkTheme(), {
     modalBackground: '#0f172a',
   },
   radii: {
+    ...baseDark.radii,
     actionButton: '12px',
     connectButton: '12px',
     modal: '16px',
   },
   shadows: {
+    ...baseDark.shadows,
     connectButton: '0 4px 12px rgba(0, 0, 0, 0.1)',
   },
-} as Theme);
+};
