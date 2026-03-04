@@ -26,13 +26,16 @@ export default function TrendingSection() {
         if (!res.ok) throw new Error('DexScreener fetch failed');
         const data = await res.json();
 
-        const pairs = data.pairs
-          ?.filter((p: any) => p.chainId === 'base' && p.volume?.h24 > 1000 && p.liquidity?.usd > 5000)
+        let pairs = data.pairs
+          ?.filter((p: any) => p.chainId === 'base' && p.volume?.h24 > 100) // Sangat longgar untuk test real data
           ?.sort((a: any, b: any) => b.priceChange.h24 - a.priceChange.h24)
           ?.slice(0, 12) || [];
 
+        console.log('Real trending pairs:', pairs.length); // Debug di console
+
         setTrending(pairs);
       } catch (err) {
+        console.error('Fetch error:', err);
         setError('Gagal load trending');
       } finally {
         setLoading(false);
@@ -69,6 +72,7 @@ export default function TrendingSection() {
             <a
               href={`https://dexscreener.com/base/${pair.pairAddress}`}
               target="_blank"
+              rel="noopener noreferrer"
               className="mt-4 inline-block text-cyan-400 hover:text-cyan-300 text-sm"
             >
               View on DexScreener →
@@ -77,8 +81,8 @@ export default function TrendingSection() {
         ))}
       </div>
       {trending.length === 0 && (
-        <p className="text-center text-gray-500 mt-8">No trending pairs right now.</p>
+        <p className="text-center text-gray-500 mt-8">Tidak ada data trending saat ini (market sepi). Coba refresh atau tunggu pump!</p>
       )}
     </div>
   );
-}
+      }
