@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 
 interface Pair {
   baseToken: { symbol: string; address: string };
+  quoteToken: { symbol: string; address: string };
   priceUsd: string;
   volume: { h24: number };
   priceChange: { h24: number };
@@ -25,10 +26,19 @@ export default function NewLaunchesSection() {
         if (!res.ok) throw new Error('DexScreener fetch failed');
         const data = await res.json();
 
-        const pairs = data.pairs
-          ?.filter((p: any) => p.chainId === 'base' && (p.age || 0) < 3600) // <1 jam
+        let pairs = data.pairs
+          ?.filter((p: any) => p.chainId === 'base' && (p.age || 0) < 3600)
           ?.sort((a: any, b: any) => b.volume.h24 - a.volume.h24)
           ?.slice(0, 12) || [];
+
+        // Fix nama token
+        pairs = pairs.map((p: any) => ({
+          ...p,
+          baseToken: {
+            ...p.baseToken,
+            symbol: p.baseToken.symbol || p.quoteToken.symbol || 'BASE',
+          },
+        }));
 
         setNewPairs(pairs);
       } catch (err) {
