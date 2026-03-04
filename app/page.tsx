@@ -1,7 +1,9 @@
+'use client';
+
+import { useState } from 'react';
 import ConnectWalletButton from '@/components/ConnectWalletButton';
 import TrendingSection from '@/components/TrendingSection';
 import NewLaunchesSection from '@/components/NewLaunchesSection';
-import { useState } from 'react';
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState<'trending' | 'new'>('trending');
