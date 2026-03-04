@@ -17,14 +17,14 @@ export default function MemeAgentChat() {
         const mlcEngine = await CreateMLCEngine(
           'https://webllm.mlc.ai/models/',
           {
-            model: 'Llama-3.1-8B-Instruct-q4f16_1-MLC',
             initProgressCallback: (report) => console.log(report.text),
           }
         );
+        await mlcEngine.reload('Llama-3.1-8B-Instruct-q4f16_1-MLC');
         setEngine(mlcEngine);
       } catch (err) {
         console.error(err);
-        setError('Gagal load model AI offline. Coba browser lain atau refresh.');
+        setError('Gagal load model AI offline. Coba browser Chrome/Edge atau refresh.');
       } finally {
         setLoading(false);
       }
@@ -86,7 +86,7 @@ export default function MemeAgentChat() {
             </div>
           </div>
         ))}
-        {loading && <div className="text-center text-gray-400">Agent mikir...</div>}
+        {loading && <div className="text-center text-gray-400">Agent mikir... (load model pertama kali bisa 30-120 detik)</div>}
         {error && <p className="text-center text-red-400">{error}</p>}
       </div>
 
@@ -110,4 +110,4 @@ export default function MemeAgentChat() {
       </div>
     </div>
   );
-        }
+}
