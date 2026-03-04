@@ -1,4 +1,10 @@
 import { NextResponse } from 'next/server';
+import OpenAI from 'openai';
+
+const grok = new OpenAI({
+  apiKey: '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',
+  baseURL: 'https://api.x.ai/v1',
+});
 
 export async function POST(request: Request) {
   const { message } = await request.json();
@@ -7,19 +13,25 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Message is required' }, { status: 400 });
   }
 
-  const systemPrompt = `
-  Kamu adalah Base Meme Agent, ahli cari alpha meme coin di chain Base.
-  Jawab singkat, langsung, dan kasih data real-time kalau bisa.
-  Kalau user tanya trending, cari token baru/pump di Base.
-  Selalu sertakan CA (contract address), % change, volume, dan link DexScreener kalau relevan.
-  Gunakan bahasa santai, seperti degen crypto.
-  `;
+  try {
+    const completion = await grok.chat.completions.create({
+      model: 'grok-beta',
+      messages: [
+        {
+          role: 'system',
+          content: 'Kamu Base Meme Agent, ahli alpha meme coin di Base. Jawab santai, kasih CA, % change, volume, link DexScreener kalau relevan. Gunakan real-time search kalau perlu.',
+        },
+        { role: 'user', content: message },
+      ],
+      temperature: 0.7,
+      max_tokens: 500,
+    });
 
-  const responseText = `Yo boss, ada meme baru pump gila nih di Base:  
-  $DEGENX – CA: 0xabc123...def456  
-  +420% (1h), volume $1.2M, liq $450k  
-  Link: https://dexscreener.com/base/0xabc123...def456  
-  Mau buy sekarang? 🚀`;
+    const reply = completion.choices[0]?.message?.content || 'No response';
 
-  return NextResponse.json({ reply: responseText });
+    return NextResponse.json({ reply });
+  } catch (err) {
+    console.error(err);
+    return NextResponse.json({ error: 'Gagal konek ke Grok API' }, { status: 500 });
+  }
 }
