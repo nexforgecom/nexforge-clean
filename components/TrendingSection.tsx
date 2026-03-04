@@ -3,13 +3,15 @@
 import { useEffect, useState } from 'react';
 
 interface Pair {
-  baseToken: { symbol: string };
+  baseToken: { symbol: string; address: string };
   priceUsd: string;
   volume: { h24: number };
   priceChange: { h24: number };
   dexId: string;
   pairAddress: string;
 }
+
+const COINGECKO_API = 'https://api.coingecko.com/api/v3';
 
 export default function TrendingSection() {
   const [trending, setTrending] = useState<Pair[]>([]);
@@ -19,13 +21,32 @@ export default function TrendingSection() {
   useEffect(() => {
     const fetchTrending = async () => {
       try {
-        const res = await fetch('https://api.dexscreener.com/latest/dex/search?q=base');
-        if (!res.ok) throw new Error('Failed to fetch');
+        const res = await fetch('https://api.dexscreener.com/latest/dex/search?q=base meme');
+        if (!res.ok) throw new Error('Failed to fetch DexScreener');
         const data = await res.json();
-        const pairs = data.pairs
-          ?.filter((p: any) => p.chainId === 'base' && p.volume?.h24 > 5000)
-          ?.sort((a: any, b: any) => b.volume.h24 - a.volume.h24)
-          ?.slice(0, 6) || [];
+
+        let pairs = data.pairs
+          ?.filter((p: any) => 
+            p.chainId === 'base' && 
+            p.volume?.h24 > 5000 &&
+            p.liquidity?.usd > 10000
+          )
+          ?.sort((a: any, b: any) => b.priceChange.h24 - a.priceChange.h24)
+          ?.slice(0, 9) || [];
+
+        if (pairs.length > 0) {
+          const contractAddresses = pairs.map((p: any) => p.baseToken.address.toLowerCase()).join(',');
+          const priceRes = await fetch(
+            `${COINGECKO_API}/simple/token_price/base?contract_addresses=${contractAddresses}&vs_currencies=usd`
+          );
+          const priceData = await priceRes.json();
+
+          pairs = pairs.map((p: any) => ({
+            ...p,
+            priceUsd: priceData[p.baseToken.address.toLowerCase()]?.usd?.toString() || p.priceUsd,
+          }));
+        }
+
         setTrending(pairs);
       } catch (err) {
         setError('Failed to load trending data');
@@ -35,7 +56,7 @@ export default function TrendingSection() {
     };
 
     fetchTrending();
-    const interval = setInterval(fetchTrending, 60000);
+    const interval = setInterval(fetchTrending, 30000);
     return () => clearInterval(interval);
   }, []);
 
@@ -77,9 +98,17 @@ export default function TrendingSection() {
       </div>
       {trending.length === 0 && (
         <p className="text-center text-gray-500 mt-8">
-          No trending pairs with sufficient volume right now. <a href="https://dexscreener.com/base" target="_blank" rel="noopener noreferrer" className="text-cyan-400 hover:text-cyan-300">Check DexScreener for latest updates →</a>
+          No trending pairs with sufficient volume right now.{' '}
+          <a 
+            href="https://dexscreener.com/base?rankBy=trendingScore&order=desc&minLiq=10000&minVol=5000" 
+            target="_blank" 
+            rel="noopener noreferrer" 
+            className="text-cyan-400 hover:text-cyan-300 underline"
+          >
+            Check DexScreener Base trending →
+          </a>
         </p>
       )}
     </div>
   );
-              }
+}
