@@ -23,7 +23,7 @@ export default function TrendingSection() {
         if (!res.ok) throw new Error('Failed to fetch');
         const data = await res.json();
         const pairs = data.pairs
-          ?.filter((p: any) => p.chainId === 'base' && p.volume?.h24 > 50000)
+          ?.filter((p: any) => p.chainId === 'base' && p.volume?.h24 > 5000)
           ?.sort((a: any, b: any) => b.volume.h24 - a.volume.h24)
           ?.slice(0, 6) || [];
         setTrending(pairs);
@@ -76,8 +76,10 @@ export default function TrendingSection() {
         ))}
       </div>
       {trending.length === 0 && (
-        <p className="text-center text-gray-500 mt-8">No trending pairs with sufficient volume right now.</p>
+        <p className="text-center text-gray-500 mt-8">
+          No trending pairs with sufficient volume right now. <a href="https://dexscreener.com/base" target="_blank" rel="noopener noreferrer" className="text-cyan-400 hover:text-cyan-300">Check DexScreener for latest updates →</a>
+        </p>
       )}
     </div>
   );
-                  }
+              }
