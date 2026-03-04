@@ -57,7 +57,7 @@ export default function PortfolioSection() {
 
   const hasNoHoldings =
     holdings.length === 0 &&
-    (!ethBalance || ethBalance.value === BigInt(0)); // Gunakan BigInt(0) bukan 0n
+    (!ethBalance || ethBalance.value === BigInt(0));
 
   return (
     <div className="mt-16 w-full">
@@ -69,7 +69,7 @@ export default function PortfolioSection() {
             <span className="font-medium text-lg">ETH</span>
           </div>
           <div className="text-right">
-            <p className="text-teal-300 text-xl font-semibold">
+            <p className="text-teal-300 text-xl font-semibold truncate">
               {ethBalance ? formatEther(ethBalance.value) : '0'} ETH
             </p>
             <p className="text-sm text-gray-400">$0.00 USD</p>
@@ -95,4 +95,4 @@ export default function PortfolioSection() {
       </div>
     </div>
   );
-        }
+          }
