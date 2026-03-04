@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { createMLCEngine } from '@mlc-ai/web-llm';
+import { CreateMLCEngine } from '@mlc-ai/web-llm';
 
 export default function MemeAgentChat() {
   const [messages, setMessages] = useState<{ role: 'user' | 'agent'; content: string }[]>([]);
@@ -14,7 +14,7 @@ export default function MemeAgentChat() {
     const initEngine = async () => {
       setLoading(true);
       try {
-        const mlcEngine = await createMLCEngine(
+        const mlcEngine = await CreateMLCEngine(
           'https://webllm.mlc.ai/models/',
           {
             model: 'Llama-3.1-8B-Instruct-q4f16_1-MLC',
@@ -110,4 +110,4 @@ export default function MemeAgentChat() {
       </div>
     </div>
   );
-}
+        }
