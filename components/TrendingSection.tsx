@@ -30,12 +30,34 @@ const GET_RECENT_TOKENS = gql`
 `;
 
 export default function TrendingSection() {
-  const { loading, error, data } = useQuery(GET_RECENT_TOKENS, {
+  const { loading, error, data, refetch } = useQuery(GET_RECENT_TOKENS, {
     pollInterval: 15000,
+    fetchPolicy: 'network-only',
+    notifyOnNetworkStatusChange: true,
   });
 
-  if (loading) return <p className="text-center text-gray-500">Loading new tokens from Doppler...</p>;
-  if (error) return <p className="text-center text-red-400">Error loading data: {error.message}</p>;
+  if (loading) {
+    return <p className="text-center text-gray-500 mt-8">Loading new tokens from Doppler...</p>;
+  }
+
+  if (error) {
+    console.error('Doppler GraphQL error:', error);
+    return (
+      <p className="text-center text-red-400 mt-8">
+        Error loading Doppler data: {error.message || 'Network issue'}.{' '}
+        <button
+          onClick={() => refetch()}
+          className="text-cyan-400 hover:text-cyan-300 underline ml-2"
+        >
+          Retry
+        </button>
+        {' '}or check{' '}
+        <a href="https://app.doppler.lol/" target="_blank" rel="noopener noreferrer" className="text-cyan-400 hover:text-cyan-300 underline">
+          Doppler App →
+        </a>
+      </p>
+    );
+  }
 
   const tokens = data?.tokens || [];
 
@@ -48,12 +70,12 @@ export default function TrendingSection() {
             key={token.id}
             className="bg-gray-800/60 rounded-xl p-6 border border-teal-500/20 hover:border-teal-400 transition-all"
           >
-            <h3 className="text-xl font-bold text-teal-300">{token.symbol} ({token.name})</h3>
+            <h3 className="text-xl font-bold text-teal-300">{token.symbol || 'Unknown'} ({token.name || 'N/A'})</h3>
             <p className="text-sm text-gray-400 mt-2">
-              Address: {token.address.slice(0, 6)}...{token.address.slice(-4)}
+              Address: {token.address ? `${token.address.slice(0, 6)}...${token.address.slice(-4)}` : 'N/A'}
             </p>
             <p className="text-sm text-gray-500 mt-1">
-              Launched: {new Date(token.createdAt * 1000).toLocaleString()}
+              Launched: {token.createdAt ? new Date(token.createdAt * 1000).toLocaleString() : 'N/A'}
             </p>
             <p className="text-sm text-gray-400 mt-2">
               Launch Type: {token.launchType || 'Unknown'}
