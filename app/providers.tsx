@@ -1,6 +1,5 @@
 'use client';
 
-import { ApolloProvider } from '@apollo/client';
 import { client } from '@/lib/apolloClient';
 import { WagmiProvider } from 'wagmi';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
