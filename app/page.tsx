@@ -1,5 +1,6 @@
 import ConnectWalletButton from '@/components/ConnectWalletButton';
 import TrendingSection from '@/components/TrendingSection';
+import PortfolioSection from '@/components/PortfolioSection';
 
 export default function Home() {
   return (
@@ -16,6 +17,7 @@ export default function Home() {
           <ConnectWalletButton />
         </div>
 
+        <PortfolioSection />
         <TrendingSection />
       </div>
     </main>
