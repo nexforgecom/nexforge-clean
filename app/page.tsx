@@ -8,7 +8,7 @@ export default function Home() {
         NexxForge v2
       </h1>
       <p className="text-xl text-gray-300 mb-12 text-center max-w-2xl">
-        Your personal Base wallet dashboard + AI Meme Agent
+        Your personal Base wallet dashboard + Offline AI Meme Agent
       </p>
 
       <div className="w-full max-w-4xl">
