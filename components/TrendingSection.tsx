@@ -1,92 +1,70 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useQuery, gql } from '@apollo/client';
 
-interface Pair {
-  baseToken: { symbol: string; address: string };
-  priceUsd: string;
-  volume: { h24: number };
-  priceChange: { h24: number };
-  dexId: string;
-  pairAddress: string;
-}
-
-const COINGECKO_API = 'https://api.coingecko.com/api/v3';
+const GET_RECENT_TOKENS = gql`
+  query GetRecentTokens {
+    tokens(
+      first: 10
+      orderBy: createdAt
+      orderDirection: desc
+      where: { chainId: "base" }
+    ) {
+      id
+      name
+      symbol
+      address
+      createdAt
+      totalSupply
+      launchType
+      creator {
+        id
+      }
+      auction {
+        id
+        status
+        currentPrice
+      }
+    }
+  }
+`;
 
 export default function TrendingSection() {
-  const [trending, setTrending] = useState<Pair[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const { loading, error, data } = useQuery(GET_RECENT_TOKENS, {
+    pollInterval: 15000,
+  });
 
-  useEffect(() => {
-    const fetchTrending = async () => {
-      try {
-        const res = await fetch('https://api.dexscreener.com/latest/dex/search?q=base meme');
-        if (!res.ok) throw new Error('Failed to fetch DexScreener');
-        const data = await res.json();
+  if (loading) return <p className="text-center text-gray-500">Loading Doppler tokens...</p>;
+  if (error) return <p className="text-center text-red-400">Error: {error.message}</p>;
 
-        let pairs = data.pairs
-          ?.filter((p: any) => 
-            p.chainId === 'base' && 
-            p.volume?.h24 > 5000 &&
-            p.liquidity?.usd > 10000
-          )
-          ?.sort((a: any, b: any) => b.priceChange.h24 - a.priceChange.h24)
-          ?.slice(0, 9) || [];
-
-        if (pairs.length > 0) {
-          const contractAddresses = pairs.map((p: any) => p.baseToken.address.toLowerCase()).join(',');
-          const priceRes = await fetch(
-            `${COINGECKO_API}/simple/token_price/base?contract_addresses=${contractAddresses}&vs_currencies=usd`
-          );
-          const priceData = await priceRes.json();
-
-          pairs = pairs.map((p: any) => ({
-            ...p,
-            priceUsd: priceData[p.baseToken.address.toLowerCase()]?.usd?.toString() || p.priceUsd,
-          }));
-        }
-
-        setTrending(pairs);
-      } catch (err) {
-        setError('Failed to load trending data');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchTrending();
-    const interval = setInterval(fetchTrending, 30000);
-    return () => clearInterval(interval);
-  }, []);
-
-  if (error) return <p className="text-center text-red-400">{error}</p>;
-  if (loading) return <p className="text-center text-gray-500">Loading trending memes...</p>;
+  const tokens = data?.tokens || [];
 
   return (
     <div className="mt-16">
-      <h2 className="text-3xl font-bold text-cyan-400 mb-8 text-center">Trending Memes on Base</h2>
+      <h2 className="text-3xl font-bold text-cyan-400 mb-8 text-center">New Tokens on Base (via Doppler)</h2>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {trending.map((pair, i) => (
+        {tokens.map((token: any) => (
           <div
-            key={i}
-            className="bg-gray-800/60 rounded-xl p-6 border border-teal-500/20 hover:border-teal-400 hover:shadow-cyan-500/10 transition-all"
+            key={token.id}
+            className="bg-gray-800/60 rounded-xl p-6 border border-teal-500/20 hover:border-teal-400 transition-all"
           >
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-xl font-bold text-teal-300">{pair.baseToken.symbol}</h3>
-              <span className="text-xs text-gray-500">{pair.dexId}</span>
-            </div>
-            <p className="text-2xl font-semibold text-white mb-2">
-              ${Number(pair.priceUsd).toFixed(6)}
+            <h3 className="text-xl font-bold text-teal-300">{token.symbol} ({token.name})</h3>
+            <p className="text-sm text-gray-400 mt-2">
+              Address: {token.address.slice(0, 6)}...{token.address.slice(-4)}
             </p>
-            <p className={`text-lg font-medium ${pair.priceChange.h24 >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-              {pair.priceChange.h24 >= 0 ? '+' : ''}{pair.priceChange.h24.toFixed(2)}% (24h)
+            <p className="text-sm text-gray-500 mt-1">
+              Launched: {new Date(token.createdAt * 1000).toLocaleString()}
             </p>
-            <p className="text-sm text-gray-400 mt-3">
-              Vol 24h: ${Math.round(pair.volume.h24 / 1000).toLocaleString()}k
+            <p className="text-sm text-gray-400 mt-2">
+              Launch Type: {token.launchType || 'Unknown'}
             </p>
+            {token.auction && (
+              <p className="text-sm text-cyan-300 mt-2">
+                Current Price: ${token.auction.currentPrice || 'N/A'}
+              </p>
+            )}
             <a
-              href={`https://dexscreener.com/base/${pair.pairAddress}`}
+              href={`https://dexscreener.com/base/${token.address}`}
               target="_blank"
               rel="noopener noreferrer"
               className="mt-4 inline-block text-cyan-400 hover:text-cyan-300 text-sm"
@@ -96,19 +74,14 @@ export default function TrendingSection() {
           </div>
         ))}
       </div>
-      {trending.length === 0 && (
+      {tokens.length === 0 && (
         <p className="text-center text-gray-500 mt-8">
-          No trending pairs with sufficient volume right now.{' '}
-          <a 
-            href="https://dexscreener.com/base?rankBy=trendingScore&order=desc&minLiq=10000&minVol=5000" 
-            target="_blank" 
-            rel="noopener noreferrer" 
-            className="text-cyan-400 hover:text-cyan-300 underline"
-          >
-            Check DexScreener Base trending →
+          No new tokens detected right now. Check{' '}
+          <a href="https://app.doppler.lol/" target="_blank" className="text-cyan-400 hover:text-cyan-300">
+            Doppler App →
           </a>
         </p>
       )}
     </div>
   );
-}
+                }
