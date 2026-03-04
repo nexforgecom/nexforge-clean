@@ -31,7 +31,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ reply });
   } catch (err) {
-    console.error(err);
+    console.error('Grok API error:', err);
     return NextResponse.json({ error: 'Gagal konek ke Grok API' }, { status: 500 });
   }
 }
