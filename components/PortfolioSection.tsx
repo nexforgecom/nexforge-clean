@@ -4,82 +4,12 @@ import { useAccount, useBalance } from 'wagmi';
 import { useEffect, useState } from 'react';
 import { formatEther } from 'viem';
 
-interface TokenHolding {
-  symbol: string;
-  balance: string;
-  usdValue: number;
-}
-
-const COINGECKO_API = 'https://api.coingecko.com/api/v3';
-
 export default function PortfolioSection() {
   const { address, isConnected } = useAccount();
   const { data: ethBalance } = useBalance({ address, chainId: 8453 });
-  const [holdings, setHoldings] = useState<TokenHolding[]>([]);
-  const [ethUsdPrice, setEthUsdPrice] = useState<number>(0);
   const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    const fetchEthPrice = async () => {
-      try {
-        const res = await fetch(`${COINGECKO_API}/simple/price?ids=ethereum&vs_currencies=usd`);
-        const data = await res.json();
-        setEthUsdPrice(data.ethereum?.usd || 0);
-      } catch (err) {
-        console.error('Error fetching ETH price:', err);
-      }
-    };
-    fetchEthPrice();
-  }, []);
-
-  useEffect(() => {
-    if (!isConnected || !address) return;
-
-    const fetchHoldings = async () => {
-      setLoading(true);
-      try {
-        const tokens = [
-          { contract: '0x4200000000000000000000000000000000000006', symbol: 'WETH' },
-        ];
-
-        const results: TokenHolding[] = [];
-
-        const contractAddresses = tokens.map(t => t.contract).join(',');
-        const priceRes = await fetch(
-          `${COINGECKO_API}/simple/token_price/base?contract_addresses=${contractAddresses}&vs_currencies=usd`
-        );
-        const priceData = await priceRes.json();
-
-        for (const token of tokens) {
-          const price = priceData[token.contract.toLowerCase()]?.usd || 0;
-          const balance = '0';
-          const usdValue = Number(balance) * price;
-
-          if (Number(balance) > 0) {
-            results.push({
-              symbol: token.symbol,
-              balance,
-              usdValue,
-            });
-          }
-        }
-
-        setHoldings(results);
-      } catch (err) {
-        console.error('Error fetching holdings/prices:', err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchHoldings();
-  }, [isConnected, address]);
-
   if (!isConnected) return null;
-  if (loading) return <p className="text-center text-gray-500 mt-8">Loading portfolio...</p>;
-
-  const ethUsdValue = ethBalance ? Number(formatEther(ethBalance.value)) * ethUsdPrice : 0;
-  const hasNoHoldings = holdings.length === 0 && ethUsdValue === 0;
 
   return (
     <div className="mt-16 w-full">
@@ -94,27 +24,12 @@ export default function PortfolioSection() {
             <p className="text-teal-300 text-xl font-semibold truncate">
               {ethBalance ? formatEther(ethBalance.value) : '0'} ETH
             </p>
-            <p className="text-sm text-gray-400">${ethUsdValue.toFixed(2)} USD</p>
+            <p className="text-sm text-gray-400">USD value not available</p>
           </div>
         </div>
 
-        {holdings.map((holding, i) => (
-          <div key={i} className="flex justify-between items-center py-4 border-b border-gray-700 last:border-0">
-            <div className="flex items-center gap-4">
-              <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full" />
-              <span className="font-medium text-lg">{holding.symbol}</span>
-            </div>
-            <div className="text-right">
-              <p className="text-teal-300 text-xl font-semibold">{holding.balance}</p>
-              <p className="text-sm text-gray-400">${holding.usdValue.toFixed(2)} USD</p>
-            </div>
-          </div>
-        ))}
-
-        {hasNoHoldings && (
-          <p className="text-center text-gray-500 py-8">No holdings detected yet.</p>
-        )}
+        <p className="text-center text-gray-500 py-8 mt-4">Token holdings coming soon</p>
       </div>
     </div>
   );
-          }
+}
