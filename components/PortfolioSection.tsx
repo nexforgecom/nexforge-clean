@@ -22,18 +22,15 @@ export default function PortfolioSection() {
     const fetchHoldings = async () => {
       setLoading(true);
       try {
-        // Contoh token (ganti atau tambah CA token yang kamu mau track)
         const tokens = [
           { address: '0x4200000000000000000000000000000000000006' as `0x${string}`, symbol: 'WETH' },
-          // Contoh meme: { address: '0x...', symbol: 'DEGEN' },
         ];
 
         const results: TokenHolding[] = [];
 
         for (const token of tokens) {
-          // Placeholder balance (real: pakai useReadContract atau Alchemy/Zapper API)
-          const balance = '0'; // Ganti dengan fetch real balance ERC-20
-          const usdValue = 0;  // Ganti dengan fetch price dari Coingecko/DexScreener
+          const balance = '0';
+          const usdValue = 0;
 
           if (Number(balance) > 0) {
             results.push({
@@ -58,11 +55,14 @@ export default function PortfolioSection() {
   if (!isConnected) return null;
   if (loading) return <p className="text-center text-gray-500 mt-8">Loading portfolio...</p>;
 
+  const hasNoHoldings =
+    holdings.length === 0 &&
+    (!ethBalance || ethBalance.value === BigInt(0)); // Gunakan BigInt(0) bukan 0n
+
   return (
     <div className="mt-16 w-full">
       <h2 className="text-3xl font-bold text-cyan-400 mb-8 text-center">Your Portfolio on Base</h2>
       <div className="bg-gray-800/60 rounded-xl p-6 border border-teal-500/20">
-        {/* Native ETH */}
         <div className="flex justify-between items-center py-4 border-b border-gray-700">
           <div className="flex items-center gap-4">
             <div className="w-10 h-10 bg-gradient-to-br from-cyan-500 to-teal-600 rounded-full" />
@@ -76,7 +76,6 @@ export default function PortfolioSection() {
           </div>
         </div>
 
-        {/* ERC-20 Tokens */}
         {holdings.map((holding, i) => (
           <div key={i} className="flex justify-between items-center py-4 border-b border-gray-700 last:border-0">
             <div className="flex items-center gap-4">
@@ -90,10 +89,10 @@ export default function PortfolioSection() {
           </div>
         ))}
 
-        {holdings.length === 0 && ethBalance?.value === 0n && (
+        {hasNoHoldings && (
           <p className="text-center text-gray-500 py-8">No holdings detected yet.</p>
         )}
       </div>
     </div>
   );
-            }
+        }
