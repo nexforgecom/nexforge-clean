@@ -1,6 +1,5 @@
 import ConnectWalletButton from '@/components/ConnectWalletButton';
-import TrendingSection from '@/components/TrendingSection';
-import PortfolioSection from '@/components/PortfolioSection';
+import MemeAgentChat from '@/components/MemeAgentChat';
 
 export default function Home() {
   return (
@@ -9,7 +8,7 @@ export default function Home() {
         NexxForge v2
       </h1>
       <p className="text-xl text-gray-300 mb-12 text-center max-w-2xl">
-        Your personal Base wallet dashboard + trending meme tracker.
+        Your personal Base wallet dashboard + AI Meme Agent
       </p>
 
       <div className="w-full max-w-4xl">
@@ -17,8 +16,7 @@ export default function Home() {
           <ConnectWalletButton />
         </div>
 
-        <PortfolioSection />
-        <TrendingSection />
+        <MemeAgentChat />
       </div>
     </main>
   );
