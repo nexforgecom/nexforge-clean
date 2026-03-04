@@ -2,11 +2,14 @@ import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
 
+import Providers from './providers';
+import Navbar from '@/components/Navbar';
+
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'NexForge v2',
-  description: 'Launch tokens easily on Base',
+  title: 'NexForge v2 - Base Dashboard',
+  description: 'Your Base wallet + Meme Tracker',
 };
 
 export default function RootLayout({
@@ -16,7 +19,12 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={inter.className}>{children}</body>
+      <body className={inter.className}>
+        <Providers>
+          <Navbar />
+          <main className="pt-20">{children}</main>
+        </Providers>
+      </body>
     </html>
   );
 }
