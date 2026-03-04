@@ -68,7 +68,7 @@ export default function PortfolioSection() {
             <div className="w-10 h-10 bg-gradient-to-br from-cyan-500 to-teal-600 rounded-full" />
             <span className="font-medium text-lg">ETH</span>
           </div>
-          <div className="text-right">
+          <div className="text-right max-w-[50%]">
             <p className="text-teal-300 text-xl font-semibold truncate">
               {ethBalance ? formatEther(ethBalance.value) : '0'} ETH
             </p>
@@ -95,4 +95,4 @@ export default function PortfolioSection() {
       </div>
     </div>
   );
-          }
+              }
