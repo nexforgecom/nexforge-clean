@@ -13,7 +13,14 @@ interface Pair {
   liquidity: { usd: number };
 }
 
-export default function TrendingSection() {
+interface TrendingSectionProps {
+  searchQuery: string;
+  timeframe: '5m' | '1h' | '6h' | '24h';
+  favorites: string[];
+  toggleFavorite: (pairAddress: string) => void;
+}
+
+export default function TrendingSection({ searchQuery, timeframe, favorites, toggleFavorite }: TrendingSectionProps) {
   const [trending, setTrending] = useState<Pair[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -28,25 +35,21 @@ export default function TrendingSection() {
         const data = await res.json();
 
         let pairs = data.pairs
-          ?.filter((p: any) => p.chainId === 'base' && p.volume?.h24 > 100 && p.liquidity?.usd > 1000)
-          ?.sort((a: any, b: any) => b.priceChange.h24 - a.priceChange.h24)
-          ?.slice(0, 12) || [];
+          ?.filter((p: any) => p.chainId === 'base' && p.volume?.h24 > 100)
+          ?.sort((a: any, b: any) => b.priceChange.h24 - a.priceChange.h24) || [];
 
-        // Prioritaskan nama token asli dari baseToken atau quoteToken
-        pairs = pairs.map((p: any) => {
-          const displaySymbol = p.baseToken.symbol || p.quoteToken.symbol || p.baseToken.name || p.quoteToken.name || p.baseToken.address.slice(0, 6) + '...' || 'UNKNOWN';
-          return {
-            ...p,
-            baseToken: {
-              ...p.baseToken,
-              symbol: displaySymbol,
-            },
-          };
-        });
+        if (searchQuery.trim()) {
+          const query = searchQuery.toLowerCase();
+          pairs = pairs.filter((p: any) =>
+            p.baseToken.symbol?.toLowerCase().includes(query) ||
+            p.quoteToken.symbol?.toLowerCase().includes(query) ||
+            p.baseToken.address.toLowerCase().includes(query)
+          );
+        }
 
-        setTrending(pairs);
+        setTrending(pairs.slice(0, 12));
       } catch (err) {
-        setError('Gagal load data dari DexScreener');
+        setError('Gagal load trending');
       } finally {
         setLoading(false);
       }
@@ -55,21 +58,24 @@ export default function TrendingSection() {
     fetchTrending();
     const interval = setInterval(fetchTrending, 30000);
     return () => clearInterval(interval);
-  }, []);
-
-  if (loading) return <p className="text-center text-gray-500">Loading real trending tokens...</p>;
-  if (error) return <p className="text-center text-red-400">{error}</p>;
+  }, [searchQuery]);
 
   return (
     <div className="mt-16">
-      <h2 className="text-3xl font-bold text-cyan-400 mb-8 text-center">Trending Now on Base</h2>
+      <h2 className="text-3xl font-bold text-cyan-400 mb-8 text-center">Trending Now on Base ({timeframe})</h2>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {trending.map((pair, i) => (
           <div
             key={i}
-            className="bg-gray-800/60 rounded-xl p-6 border border-teal-500/20 hover:border-teal-400 transition-all"
+            className="bg-gray-800/60 rounded-xl p-6 border border-teal-500/20 hover:border-teal-400 transition-all relative"
           >
-            <h3 className="text-xl font-bold text-teal-300">{pair.baseToken.symbol}</h3>
+            <button
+              onClick={() => toggleFavorite(pair.pairAddress)}
+              className="absolute top-4 right-4 text-yellow-400 hover:text-yellow-300 text-2xl"
+            >
+              {favorites.includes(pair.pairAddress) ? '★' : '☆'}
+            </button>
+            <h3 className="text-xl font-bold text-teal-300">{pair.baseToken.symbol || pair.quoteToken.symbol || 'BASE'}</h3>
             <p className="text-2xl font-semibold text-white mt-2">
               ${Number(pair.priceUsd).toFixed(6)}
             </p>
@@ -91,7 +97,7 @@ export default function TrendingSection() {
         ))}
       </div>
       {trending.length === 0 && (
-        <p className="text-center text-gray-500 mt-8">Tidak ada token trending saat ini (market sepi). Coba refresh atau tunggu pump!</p>
+        <p className="text-center text-gray-500 mt-8">Tidak ada token trending saat ini. Coba ubah pencarian atau tunggu pump!</p>
       )}
     </div>
   );
