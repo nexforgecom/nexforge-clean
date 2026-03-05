@@ -23,22 +23,20 @@ export default function TrendingSection() {
       setLoading(true);
       setError(null);
       try {
+        // Endpoint alternatif: search dengan keyword lebih luas untuk Base
         const res = await fetch('https://api.dexscreener.com/latest/dex/search?q=base');
-        if (!res.ok) throw new Error('DexScreener fetch failed');
+        if (!res.ok) throw new Error('DexScreener search failed');
+
         const data = await res.json();
 
         let pairs = data.pairs
-          ?.filter((p: any) => 
-            p.chainId === 'base' && 
-            p.volume?.h24 > 500 && 
-            p.liquidity?.usd > 5000 &&
-            p.baseToken.symbol && p.baseToken.symbol !== 'BASE' && p.baseToken.symbol !== 'WETH' // Prioritas token ERC-20 asli
-          )
+          ?.filter((p: any) => p.chainId === 'base' && p.volume?.h24 > 500 && p.liquidity?.usd > 2000)
           ?.sort((a: any, b: any) => b.priceChange.h24 - a.priceChange.h24)
           ?.slice(0, 12) || [];
 
+        // Fix nama token asli (prioritas base → quote → name → address short)
         pairs = pairs.map((p: any) => {
-          const displaySymbol = p.baseToken.symbol || p.quoteToken.symbol || p.baseToken.name || p.quoteToken.name || 'UNKNOWN';
+          const displaySymbol = p.baseToken.symbol || p.quoteToken.symbol || p.baseToken.name || p.quoteToken.name || p.baseToken.address.slice(0, 6) + '...' || 'UNKNOWN';
           return {
             ...p,
             baseToken: {
@@ -48,9 +46,21 @@ export default function TrendingSection() {
           };
         });
 
+        // Endpoint alternatif kedua: top pools by volume (kalau search kosong)
+        if (pairs.length === 0) {
+          const resTop = await fetch('https://api.dexscreener.com/latest/dex/pairs/base');
+          if (resTop.ok) {
+            const dataTop = await resTop.json();
+            pairs = dataTop.pairs
+              ?.filter((p: any) => p.volume?.h24 > 500)
+              ?.sort((a: any, b: any) => b.volume.h24 - a.volume.h24)
+              ?.slice(0, 12) || [];
+          }
+        }
+
         setTrending(pairs);
       } catch (err) {
-        setError('Gagal load trending');
+        setError('Gagal load data dari DexScreener');
       } finally {
         setLoading(false);
       }
@@ -95,8 +105,8 @@ export default function TrendingSection() {
         ))}
       </div>
       {trending.length === 0 && (
-        <p className="text-center text-gray-500 mt-8">Tidak ada token trending saat ini (market sepi). Coba refresh atau tunggu pump!</p>
+        <p className="text-center text-gray-500 mt-8">Tidak ada token trending saat ini. Coba refresh atau tunggu pump!</p>
       )}
     </div>
   );
-        }
+                  }
