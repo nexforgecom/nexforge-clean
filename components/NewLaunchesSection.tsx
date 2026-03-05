@@ -27,7 +27,7 @@ export default function NewLaunchesSection() {
         const data = await res.json();
 
         let pairs = data.pairs
-          ?.filter((p: any) => p.chainId === 'base' && (p.age || 0) < 3600 && p.baseToken.symbol && p.baseToken.symbol !== 'BASE')
+          ?.filter((p: any) => p.chainId === 'base' && (p.age || 0) < 3600)
           ?.sort((a: any, b: any) => b.volume.h24 - a.volume.h24)
           ?.slice(0, 12) || [];
 
