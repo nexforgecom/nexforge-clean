@@ -11,13 +11,11 @@ export default function Home() {
   const [timeframe, setTimeframe] = useState<'5m' | '1h' | '6h' | '24h'>('24h');
   const [favorites, setFavorites] = useState<string[]>([]);
 
-  // Load favorites dari localStorage
   useEffect(() => {
     const saved = localStorage.getItem('memeFavorites');
     if (saved) setFavorites(JSON.parse(saved));
   }, []);
 
-  // Save favorites ke localStorage
   useEffect(() => {
     localStorage.setItem('memeFavorites', JSON.stringify(favorites));
   }, [favorites]);
@@ -109,4 +107,4 @@ export default function Home() {
       </div>
     </main>
   );
-                }
+          }
